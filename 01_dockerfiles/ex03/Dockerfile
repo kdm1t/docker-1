@@ -9,8 +9,8 @@ RUN wget https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/scrip
 RUN apt update && apt install -y tzdata && \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN sed -i "s/# grafana\['enable'\] = true/grafana['enable'] = false/g" /etc/gitlab/gitlab.rb
-RUN sed -i "s/# gitlab_rails\['rake_cache_clear'\] = true/gitlab_rails['enable'] = false/g" /etc/gitlab/gitlab.rb
+# RUN sed -i "s/# grafana\['enable'\] = true/grafana['enable'] = false/g" /etc/gitlab/gitlab.rb
+# RUN sed -i "s/# gitlab_rails\['rake_cache_clear'\] = true/gitlab_rails['enable'] = false/g" /etc/gitlab/gitlab.rb
 
 EXPOSE 443 80 22
 

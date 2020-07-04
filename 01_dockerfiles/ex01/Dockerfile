@@ -11,5 +11,3 @@ RUN apt-get update && \
     tar -xvf teamspeak3-server_linux_amd64-3.12.1.tar.bz2
 
 WORKDIR teamspeak3-server_linux_amd64 
-
-ENTRYPOINT /bin/sh 
