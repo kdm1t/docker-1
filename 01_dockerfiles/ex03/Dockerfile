@@ -1,20 +1,54 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y ca-certificates openssh-server wget postfix
+RUN apt -y update && \
+	apt -y upgrade && \
+	apt -y install curl \
+		openssh-server \
+		tzdata \
+		postfix \
+		ca-certificates && \
+	apt -y clean
 
-RUN wget https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh && chmod 777 script.deb.sh && ./script.deb.sh && apt-get install -y gitlab-ce
+ENV TERM xterm
 
-RUN apt update && apt install -y tzdata && \
-  apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN curl --fail \
+		https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | \
+		bash && \
+	apt -y install gitlab-ce && \
+	apt -y clean
 
-# RUN sed -i "s/# grafana\['enable'\] = true/grafana['enable'] = false/g" /etc/gitlab/gitlab.rb
-# RUN sed -i "s/# gitlab_rails\['rake_cache_clear'\] = true/gitlab_rails['enable'] = false/g" /etc/gitlab/gitlab.rb
+ARG EXTERNAL_URL="192.168.90.100"
+ARG HTTPS_PORT="8443"
+ARG GITLAB_OMNIBUS_CONFIG="external_url 'https://${EXTERNAL_URL}/'; letsencrypt['enable'] = false"
 
-EXPOSE 443 80 22
+EXPOSE 22 80 ${HTTPS_PORT}
 
-ENTRYPOINT (/opt/gitlab/embedded/bin/runsvdir-start &) && gitlab-ctl reconfigure && tail -f /dev/null
+RUN mkdir -p /etc/gitlab/ssl && \
+	chmod 755 /etc/gitlab/ssl && \
+	openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/gitlab/ssl/${EXTERNAL_URL}.key -out /etc/gitlab/ssl/${EXTERNAL_URL}.crt -subj "/C=RU/ST=Moscow/L=Moscow/O=21-school/OU=docker-1/CN=${EXTERNAL_URL}" && \
+	chmod 600 /etc/gitlab/ssl/* && \
+	sed -i "s/\# letsencrypt\['enable'\] = nil/letsencrypt\['enable'\] = false/" /etc/gitlab/gitlab.rb && \
+	sed -i "s/external_url 'http:\/\/gitlab.example.com'/external_url 'https:\/\/${EXTERNAL_URL}:${HTTPS_PORT}'/" /etc/gitlab/gitlab.rb && \
+	sed -i "s/# nginx\['redirect_http_to_https'\] = false/nginx\['redirect_http_to_https'\] = true/" /etc/gitlab/gitlab.rb
 
+RUN mkdir -p /run/sshd
+
+ENTRYPOINT (/opt/gitlab/embedded/bin/runsvdir-start &) && \
+				/usr/sbin/sshd && \
+				gitlab-ctl reconfigure && \
+				tail -f /dev/null
+
+# How to build it?
 # docker build -t ex03 .
-# docker run -it --rm -p 8080:80 -p 8022:22 -p 8443:443 --privileged ex03
+
+# How to run it?
+# docker run -it --rm -p 8080:80 -p 8022:22 -p 8443:8443 --privileged ex03
+
+# flags for docker-machine create: --virtualbox-cpu-count "2"
+#                                   --virtualbox-memory "2048"
+
+# how to clone with ssh:   ssh -T -p 8022 git@192.168.99.101
+#                          git clone ssh://git@192.168.99.101:8022/root/test_project.git
+
+# how to clone with https: git config --global http.sslVerify false
+#                          git clone https://192.168.99.101:8443/root/test_project.git

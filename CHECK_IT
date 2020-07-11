@@ -1,15 +1,8 @@
-Необходимо проверить TeamSpeak Server
-.
-docker-1/01_dockerfiles/ex01
-.
-Проверить на своем компе файлы тимспик и тимспик сервера
-
-
 Необходимо проверить Ruby on rails application
 .
 docker-1/01_dockerfiles/ex02
 .
-Посмотреть на домашнем пк app и удостовериться в его корректной работе
+
 
 Mirage
 Mi-s3
@@ -19,12 +12,6 @@ Mi-s3
 docker-1/01_dockerfiles/ex03
 .
 
-Бонусная и основная часть успешно работают (можно поставить Майнкрафт на мак для проверки бонусной части, но хз надо ли вообще это делать)
 
-
-
-Создание ссылки на .docker директорию для избежания проблем с ограничением памяти на маке:
-cp -r .docker /goinfre/nickname
-ln -s /goinfre/nickname/.docker ~/.docker
-
-(symbolic link)
+https://medium.com/@1997corry/running-your-own-gitlab-on-docker-community-edition-39c4a8f99553
+https://github.com/why-7/docker/blob/master/01_dockerfiles/ex03/Dockerfile
